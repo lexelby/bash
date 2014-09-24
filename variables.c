@@ -336,36 +336,6 @@ initialize_shell_variables (env, privmode)
 
       temp_var = (SHELL_VAR *)NULL;
 
-      /* If exported function, define it now.  Don't import functions from
-	 the environment in privileged mode. */
-      if (privmode == 0 && read_but_dont_execute == 0 && STREQN ("() {", string, 4))
-	{
-	  string_length = strlen (string);
-	  temp_string = (char *)xmalloc (3 + string_length + char_index);
-
-	  strcpy (temp_string, name);
-	  temp_string[char_index] = ' ';
-	  strcpy (temp_string + char_index + 1, string);
-
-	  parse_and_execute (temp_string, name, SEVAL_NONINT|SEVAL_NOHIST);
-
-	  /* Ancient backwards compatibility.  Old versions of bash exported
-	     functions like name()=() {...} */
-	  if (name[char_index - 1] == ')' && name[char_index - 2] == '(')
-	    name[char_index - 2] = '\0';
-
-	  if (temp_var = find_function (name))
-	    {
-	      VSETATTR (temp_var, (att_exported|att_imported));
-	      array_needs_making = 1;
-	    }
-	  else
-	    report_error (_("error importing function definition for `%s'"), name);
-
-	  /* ( */
-	  if (name[char_index - 1] == ')' && name[char_index - 2] == '\0')
-	    name[char_index - 2] = '(';		/* ) */
-	}
 #if defined (ARRAY_VARS)
 #  if 0
       /* Array variables may not yet be exported. */
