@@ -1,3 +1,36 @@
+This Repository
+===============
+
+This version of bash was created in response to CVE-2014-6271.  More
+information on the original vulnerability here:
+
+https://securityblog.redhat.com/2014/09/24/bash-specially-crafted-environment-variables-code-injection-attack/
+
+This repo doesn't stop at fixing the vulnerability; it completely
+removes the capability of importing functions from the environment.
+This functionality is inherently very risky, as demonstrated here:
+
+  $ env ls='() { echo foo; }' bash
+  $ ls
+  foo
+
+  $ env /bin/ls='() { echo foo; }' bash
+  $ /bin/ls
+  foo
+
+  $ env read='() { echo pwned; }' builtin='() { "$@";}' bash
+  $ read alksdfj
+  pwned
+  $ builtin read laksdjf
+  pwned
+
+If an attacker controls the environment, they can overshadow any
+builtin or external command in a way that is impossible to
+adequately protect against.  Furthermore, I've never seen a use
+of imported function definitions in the wild.
+
+The original GNU Bash README follows:
+
 Introduction
 ============
 
